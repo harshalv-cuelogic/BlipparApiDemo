@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/Android-Image-Upload.iml" filepath="$PROJECT_DIR$/Android-Image-Upload.iml" />
       <module fileurl="file://$PROJECT_DIR$/BlipparApiDemo.iml" filepath="$PROJECT_DIR$/BlipparApiDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cameraview/cameraview.iml" filepath="$PROJECT_DIR$/cameraview/cameraview.iml" />
     </modules>
   </component>
 </project>

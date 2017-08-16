@@ -1,12 +1,14 @@
 package com.cuelogic.blipparapidemo.models;
 
+import android.support.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by Harshal Vibhandik on 11/08/17.
  */
 
-public class Tag {
+public class Tag implements Comparable<Tag> {
     @SerializedName("ID")
     private String id;
     @SerializedName("Name")
@@ -16,7 +18,7 @@ public class Tag {
     @SerializedName("MatchTypes")
     private String[] matchTypes;
     @SerializedName("Score")
-    private String score;
+    private double score;
     @SerializedName("PassParams")
     private String passParams;
 
@@ -52,11 +54,11 @@ public class Tag {
         this.matchTypes = matchTypes;
     }
 
-    public String getScore() {
+    public double getScore() {
         return score;
     }
 
-    public void setScore(String score) {
+    public void setScore(double score) {
         this.score = score;
     }
 
@@ -71,5 +73,11 @@ public class Tag {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public int compareTo(@NonNull Tag o) {
+        //return Double.valueOf(this.score).compareTo(Double.valueOf(o.score)); //ascending order from score
+        return Double.valueOf(o.score).compareTo(Double.valueOf(this.score)); //descending order from score
     }
 }

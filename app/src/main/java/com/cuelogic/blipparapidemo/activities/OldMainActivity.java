@@ -1,4 +1,4 @@
-package com.cuelogic.blipparapidemo;
+package com.cuelogic.blipparapidemo.activities;
 
 import android.Manifest;
 import android.content.CursorLoader;
@@ -28,12 +28,13 @@ import com.android.volley.Response;
 import com.android.volley.error.VolleyError;
 import com.android.volley.request.SimpleMultiPartRequest;
 import com.android.volley.request.StringRequest;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
+import com.cuelogic.blipparapidemo.MyApplication;
+import com.cuelogic.blipparapidemo.R;
 import com.cuelogic.blipparapidemo.managers.PreferenceManager;
 import com.cuelogic.blipparapidemo.models.RefreshTokenResponse;
 import com.cuelogic.blipparapidemo.models.Tag;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,10 +45,10 @@ import java.util.Map;
 
 import id.zelory.compressor.Compressor;
 
-public class MainActivity extends BaseActivity {
+public class OldMainActivity extends BaseActivity {
     private ImageView imageView;
     private Button btnChoose, btnUpload;
-    private ProgressBar progressBar;
+
     public static String BASE_URL = "https://bapi.blippar.com";
 
     public static String IMAGE_LOOKUP_URL = BASE_URL+"/v1/imageLookup";
@@ -68,7 +69,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_old);
 
         imageView = (ImageView) findViewById(R.id.imageView);
         btnChoose = (Button) findViewById(R.id.button_choose);
@@ -125,7 +126,7 @@ public class MainActivity extends BaseActivity {
                     public void onResponse(String response) {
                         try {
                             RefreshTokenResponse refreshTokenResponse = new Gson().fromJson(response, RefreshTokenResponse.class);
-                            PreferenceManager.setRefreshTokenResponse(MainActivity.this, refreshTokenResponse);
+                            PreferenceManager.setRefreshTokenResponse(OldMainActivity.this, refreshTokenResponse);
                             textViewTags.setText(refreshTokenResponse.toString());
                         } catch (Exception e) {
                             // JSON error
@@ -243,7 +244,7 @@ public class MainActivity extends BaseActivity {
 
         smr.addFile("input_image", imagePath);
 
-        String strAuth = PreferenceManager.getTokenType(MainActivity.this)+" "+PreferenceManager.getAccessToken(MainActivity.this);
+        String strAuth = PreferenceManager.getTokenType(OldMainActivity.this)+" "+PreferenceManager.getAccessToken(OldMainActivity.this);
 
         Map<String, String> mapHeaders = new HashMap<>();
         mapHeaders.put("Authorization", strAuth);

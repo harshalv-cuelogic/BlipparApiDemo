@@ -1,4 +1,4 @@
-package com.cuelogic.blipparapidemo;
+package com.cuelogic.blipparapidemo.activities;
 
 import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;

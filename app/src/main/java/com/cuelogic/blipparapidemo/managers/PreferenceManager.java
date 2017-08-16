@@ -8,9 +8,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
-import com.google.gson.Gson;
-
 import com.cuelogic.blipparapidemo.models.RefreshTokenResponse;
+import com.google.gson.Gson;
 
 public final class PreferenceManager {
     private static final String PREF_NAME = "BlipparApiPreferenses";
