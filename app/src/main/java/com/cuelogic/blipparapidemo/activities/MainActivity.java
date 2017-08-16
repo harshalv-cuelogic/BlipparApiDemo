@@ -42,6 +42,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -52,6 +54,7 @@ import com.android.volley.request.StringRequest;
 import com.cuelogic.blipparapidemo.MyApplication;
 import com.cuelogic.blipparapidemo.R;
 import com.cuelogic.blipparapidemo.fragments.AspectRatioFragment;
+import com.cuelogic.blipparapidemo.fragments.OtherTagsFragment;
 import com.cuelogic.blipparapidemo.managers.PreferenceManager;
 import com.cuelogic.blipparapidemo.models.RefreshTokenResponse;
 import com.cuelogic.blipparapidemo.models.Tag;
@@ -80,7 +83,7 @@ import id.zelory.compressor.Compressor;
  */
 public class MainActivity extends BaseActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback,
-        AspectRatioFragment.Listener {
+        AspectRatioFragment.Listener, OtherTagsFragment.Listener {
 
     private static final String TAG = "MainActivity";
 
@@ -118,22 +121,15 @@ public class MainActivity extends BaseActivity implements
             R.string.flash_on,
     };
 
+    private List<Tag> tags = new ArrayList<>();
     private int mCurrentFlash;
 
     private CameraView mCameraView;
 
     private Handler mBackgroundHandler;
 
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.take_picture:
-                    checkAndPickImage();
-                    break;
-            }
-        }
-    };
+    private LinearLayout linLayResult;
+    private TextView textViewPrimaryResult, textViewOtherResult;
 
     private void checkAndPickImage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -161,10 +157,35 @@ public class MainActivity extends BaseActivity implements
         if (mCameraView != null) {
             mCameraView.addCallback(mCallback);
         }
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.take_picture);
-        if (fab != null) {
-            fab.setOnClickListener(mOnClickListener);
-        }
+
+        linLayResult = (LinearLayout) findViewById(R.id.linLayResult);
+        textViewPrimaryResult = (TextView) findViewById(R.id.textViewPrimaryResult);
+        textViewOtherResult = (TextView) findViewById(R.id.textViewOtherResult);
+        textViewPrimaryResult.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTagOnGoogleResults(tags.get(0));
+            }
+        });
+
+        textViewOtherResult.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                if (fragmentManager.findFragmentByTag(FRAGMENT_DIALOG) == null) {
+                    OtherTagsFragment.newInstance(tags)
+                            .show(fragmentManager, FRAGMENT_DIALOG);
+                }
+            }
+        });
+
+        findViewById(R.id.imageViewTouchToCapture).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkAndPickImage();
+            }
+        });
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -175,6 +196,12 @@ public class MainActivity extends BaseActivity implements
         if (PreferenceManager.isToRefreshToken(this)) {
             refreshToken();
         }
+    }
+
+    private void showTagOnGoogleResults(Tag tag) {
+        Uri uri = Uri.parse("http://www.google.com/#q=" + tag.getName());
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(intent);
     }
 
     private void refreshToken() {
@@ -322,6 +349,11 @@ public class MainActivity extends BaseActivity implements
         }
     }
 
+    @Override
+    public void onTagSelected(@NonNull Tag tag) {
+        showTagOnGoogleResults(tag);
+    }
+
     private Handler getBackgroundHandler() {
         if (mBackgroundHandler == null) {
             HandlerThread thread = new HandlerThread("background");
@@ -406,28 +438,14 @@ public class MainActivity extends BaseActivity implements
                     public void onResponse(String response) {
                         //Log.d("Response", response);
                         try {
-                            final List<Tag> tags = new Gson().fromJson(response, new TypeToken<ArrayList<Tag>>() {
+                            tags.clear();
+                            List<Tag> results = new Gson().fromJson(response, new TypeToken<ArrayList<Tag>>() {
                             }.getType());
+                            tags.addAll(results);
                             if (tags.size() > 0) {
-                                new AlertDialog.Builder(MainActivity.this)
-                                        .setTitle("Tags Found")
-                                        .setMessage(tags.toString())
-                                        .setPositiveButton(R.string.know_more, new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.dismiss();
-                                                Uri uri = Uri.parse("http://www.google.com/#q="+tags.get(0).getName());
-                                                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                                                startActivity(intent);
-                                            }
-                                        })
-                                        .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.dismiss();
-                                            }
-                                        })
-                                        .show();
+                                linLayResult.setVisibility(View.VISIBLE);
+                                textViewPrimaryResult.setText(tags.get(0).getName());
+                                textViewOtherResult.setText("Tags : " + tags.toString());
                             } else {
                                 showToastShort(getString(R.string.no_tags_found));
                             }
@@ -510,7 +528,5 @@ public class MainActivity extends BaseActivity implements
                             })
                     .create();
         }
-
     }
-
 }

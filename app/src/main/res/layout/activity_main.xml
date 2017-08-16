@@ -22,7 +22,7 @@
     <com.google.android.cameraview.CameraView
         android:id="@+id/camera"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
@@ -37,14 +37,38 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/take_picture"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/imageViewTouchToCapture"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/square_capture" />
+
+    <LinearLayout
+        android:id="@+id/linLayResult"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        app:srcCompat="@drawable/ic_camera"
-        app:useCompatPadding="true"
-        tools:ignore="VectorDrawableCompat" />
+        android:background="@color/colorPrimary"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="5dp">
 
+        <TextView
+            android:id="@+id/textViewPrimaryResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableRight="@drawable/ic_google_search"
+            android:padding="10dp"
+            android:textColor="@android:color/white"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/textViewOtherResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:textColor="@android:color/white"
+            android:textSize="14dp" />
+    </LinearLayout>
 </RelativeLayout>

@@ -1,5 +1,7 @@
 package com.cuelogic.blipparapidemo.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
@@ -8,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by Harshal Vibhandik on 11/08/17.
  */
 
-public class Tag implements Comparable<Tag> {
+public class Tag implements Comparable<Tag>,Parcelable {
     @SerializedName("ID")
     private String id;
     @SerializedName("Name")
@@ -80,4 +82,41 @@ public class Tag implements Comparable<Tag> {
         //return Double.valueOf(this.score).compareTo(Double.valueOf(o.score)); //ascending order from score
         return Double.valueOf(o.score).compareTo(Double.valueOf(this.score)); //descending order from score
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+        dest.writeString(this.displayName);
+        dest.writeStringArray(this.matchTypes);
+        dest.writeDouble(this.score);
+        dest.writeString(this.passParams);
+    }
+
+    public Tag() {
+    }
+
+    protected Tag(Parcel in) {
+        this.id = in.readString();
+        this.name = in.readString();
+        this.displayName = in.readString();
+        this.matchTypes = in.createStringArray();
+        this.score = in.readDouble();
+        this.passParams = in.readString();
+    }
+
+    public static final Parcelable.Creator<Tag> CREATOR = new Parcelable.Creator<Tag>() {
+        public Tag createFromParcel(Parcel source) {
+            return new Tag(source);
+        }
+
+        public Tag[] newArray(int size) {
+            return new Tag[size];
+        }
+    };
 }
