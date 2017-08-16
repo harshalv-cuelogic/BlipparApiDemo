@@ -30,4 +30,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.0.0'
     compile 'dev.dworks.libs:volleyplus:+'
     compile 'com.google.code.gson:gson:2.7'
+    compile 'id.zelory:compressor:2.1.0'
 }

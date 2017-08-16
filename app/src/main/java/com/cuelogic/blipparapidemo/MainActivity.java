@@ -5,9 +5,12 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -32,10 +35,14 @@ import com.cuelogic.blipparapidemo.managers.PreferenceManager;
 import com.cuelogic.blipparapidemo.models.RefreshTokenResponse;
 import com.cuelogic.blipparapidemo.models.Tag;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import id.zelory.compressor.Compressor;
 
 public class MainActivity extends BaseActivity {
     private ImageView imageView;
@@ -55,6 +62,8 @@ public class MainActivity extends BaseActivity {
 
     String filePath;
     private TextView textViewTags;
+
+    private static final String EXTERNAL_DIR_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()+"/BlipparApiDemo/Images";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,12 +185,28 @@ public class MainActivity extends BaseActivity {
             if(requestCode == PICK_IMAGE_REQUEST){
                 Uri picUri = data.getData();
 
-                filePath = getPath(picUri);
+                File extDir = new File(EXTERNAL_DIR_PATH);
+                if(!extDir.exists()) {
+                    extDir.mkdirs();
+                }
 
-                Log.d("picUri", picUri.toString());
-                Log.d("filePath", filePath);
+                try {
+                    File compressedImage = new Compressor(this)
+                            .setMaxWidth(640)
+                            .setMaxHeight(480)
+                            .setQuality(75)
+                            .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                            .setDestinationDirectoryPath(extDir.getAbsolutePath())
+                            .compressToFile(new File(getPath(picUri)));
 
-                imageView.setImageURI(picUri);
+                    filePath = compressedImage.getAbsolutePath();
+
+                    Log.d("filePath", filePath);
+
+                    imageView.setImageBitmap(BitmapFactory.decodeFile(filePath));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -195,7 +220,11 @@ public class MainActivity extends BaseActivity {
                         //Log.d("Response", response);
                         try {
                             List<Tag> tags = new Gson().fromJson(response, new TypeToken<ArrayList<Tag>>(){}.getType());
-                            textViewTags.setText("Tags : "+tags.toString());
+                            if(tags.size() > 0) {
+                                textViewTags.setText("Tags : "+tags.toString());
+                            } else {
+                                textViewTags.setText("No tags found for provided image.");
+                            }
                         } catch (Exception e) {
                             // JSON error
                             e.printStackTrace();
