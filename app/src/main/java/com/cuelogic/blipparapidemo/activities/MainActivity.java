@@ -30,7 +30,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -42,6 +41,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,7 +68,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +99,7 @@ public class MainActivity extends BaseActivity implements
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final int REQUEST_STORAGE_PERMISSION = 2;
+    public static final int MAX_COUNT = 5;
 
     private static final String FRAGMENT_DIALOG = "dialog";
 
@@ -127,11 +127,15 @@ public class MainActivity extends BaseActivity implements
     private CameraView mCameraView;
 
     private Handler mBackgroundHandler;
+    private Handler mLooperHandler;
 
     private LinearLayout linLayResult;
     private TextView textViewPrimaryResult, textViewOtherResult;
 
-    private void checkAndPickImage() {
+    private int count = 0;
+    private Button buttonRestart;
+
+    private void checkAndCaptureImage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 takePicture();
@@ -161,6 +165,18 @@ public class MainActivity extends BaseActivity implements
         linLayResult = (LinearLayout) findViewById(R.id.linLayResult);
         textViewPrimaryResult = (TextView) findViewById(R.id.textViewPrimaryResult);
         textViewOtherResult = (TextView) findViewById(R.id.textViewOtherResult);
+
+        mLooperHandler = new Handler();
+
+        buttonRestart = (Button) findViewById(R.id.buttonRestart);
+        buttonRestart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLooperHandler.removeCallbacksAndMessages(null);
+                startLooper();
+            }
+        });
+
         textViewPrimaryResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -179,12 +195,12 @@ public class MainActivity extends BaseActivity implements
             }
         });
 
-        findViewById(R.id.imageViewTouchToCapture).setOnClickListener(new View.OnClickListener() {
+        /*findViewById(R.id.imageViewTouchToCapture).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkAndPickImage();
+                checkAndCaptureImage();
             }
-        });
+        });*/
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -195,7 +211,28 @@ public class MainActivity extends BaseActivity implements
 
         if (PreferenceManager.isToRefreshToken(this)) {
             refreshToken();
+        } else {
+            startLooper();
         }
+    }
+
+    private void startLooper() {
+        buttonRestart.setVisibility(View.GONE);
+        count = 0;
+        mLooperHandler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                checkAndCaptureImage();
+                count++;
+                if(count >= MAX_COUNT) {
+                    mLooperHandler.removeCallbacksAndMessages(null);
+                    buttonRestart.setVisibility(View.VISIBLE);
+                } else {
+                    mLooperHandler.postDelayed(this, 3000);
+                }
+            }
+        }, 3000);
     }
 
     private void showTagOnGoogleResults(Tag tag) {
@@ -213,6 +250,8 @@ public class MainActivity extends BaseActivity implements
                         try {
                             RefreshTokenResponse refreshTokenResponse = new Gson().fromJson(response, RefreshTokenResponse.class);
                             PreferenceManager.setRefreshTokenResponse(MainActivity.this, refreshTokenResponse);
+                            mLooperHandler.removeCallbacksAndMessages(null);
+                            startLooper();
                         } catch (Exception e) {
                             // JSON error
                             e.printStackTrace();
@@ -264,6 +303,10 @@ public class MainActivity extends BaseActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(mLooperHandler != null) {
+            mLooperHandler.removeCallbacksAndMessages(null);
+            mLooperHandler = null;
+        }
         if (mBackgroundHandler != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 mBackgroundHandler.getLooper().quitSafely();
@@ -410,9 +453,9 @@ public class MainActivity extends BaseActivity implements
 
                     try {
                         File compressedImage = new Compressor(MainActivity.this)
-                                .setMaxWidth(640)
-                                .setMaxHeight(480)
-                                .setQuality(75)
+                                .setMaxWidth(320)
+                                .setMaxHeight(240)
+                                .setQuality(50)
                                 .setCompressFormat(Bitmap.CompressFormat.JPEG)
                                 .setDestinationDirectoryPath(extDir.getAbsolutePath())
                                 .compressToFile(file);
@@ -431,7 +474,7 @@ public class MainActivity extends BaseActivity implements
     };
 
     private void imageUpload(final String imagePath) {
-        showProgress();
+        //showProgress();
         SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, IMAGE_LOOKUP_URL,
                 new Response.Listener<String>() {
                     @Override
@@ -453,13 +496,13 @@ public class MainActivity extends BaseActivity implements
                             // JSON error
                             e.printStackTrace();
                         }
-                        dismissProgress();
+                        //dismissProgress();
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 showToastLong(error.getMessage());
-                dismissProgress();
+                //dismissProgress();
             }
         });
 

@@ -37,6 +37,18 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
+    <Button
+        android:id="@+id/buttonRestart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dp"
+        android:background="@color/colorPrimary"
+        android:text="@string/restart"
+        android:textColor="@android:color/white"
+        android:visibility="gone" />
+
     <ImageView
         android:id="@+id/imageViewTouchToCapture"
         android:layout_width="300dp"
@@ -51,8 +63,8 @@
         android:layout_alignParentBottom="true"
         android:background="@color/colorPrimary"
         android:orientation="vertical"
-        android:visibility="gone"
-        android:padding="5dp">
+        android:padding="5dp"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/textViewPrimaryResult"
@@ -62,6 +74,11 @@
             android:padding="10dp"
             android:textColor="@android:color/white"
             android:textSize="20dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/black"></View>
 
         <TextView
             android:id="@+id/textViewOtherResult"
